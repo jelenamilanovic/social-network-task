@@ -11,10 +11,12 @@
           <span>{{person.directFriends}}</span>
         </div>
         <div class="connection-info">
-          <h4>Undirect Contacts: </h4>
+          <h4>Indirect Contacts: </h4>
+          <span>{{person.indirectContacts}}</span>
         </div>
         <div class="connection-info">
           <h4>Suggestions: </h4>
+          <span>{{person.friendSuggestions}}</span>
         </div>
       </div>
     </div>
@@ -22,26 +24,38 @@
 </template>
 
 <script>
-  import {store} from '../store'
+import { store } from "../store";
 
-  export default {
-    data () {
-      return {
-        person: null
-      }
-    },
+export default {
+  data() {
+    return {
+      person: null
+    };
+  },
 
-    created () {
-      let id = this.$route.params.id
-      console.log(store.network)
-      this.person = {...store.network.findPersonById(id)}
-      this.person.directFriends = store.network.getPersonsDirectFriends(id)
-                                    .map(friend => {
-                                      return friend.firstName + ' ' + friend.surname 
-                                    })
-                                    .join(', ')
+  methods: {
+    getFullname(friend) {
+      return friend.firstName + " " + friend.surname;
     }
+  },
+
+  created() {
+    let id = this.$route.params.id;
+    this.person = { ...store.network.findPersonById(id) };
+    this.person.directFriends = store.network
+      .getPersonsDirectFriends(id)
+      .map(this.getFullname)
+      .join(", ");
+    this.person.indirectContacts = store.network
+      .getPersonsIndirectContacts(id)
+      .map(this.getFullname)
+      .join(", ");
+    this.person.friendSuggestions = store.network
+      .getFriendSuggestions(id)
+      .map(this.getFullname)
+      .join(", ");
   }
+};
 </script>
 
 <style scoped>
@@ -64,7 +78,7 @@
 
 .person-info {
   flex: 1 1 90%;
-  padding: 20px auto; 
+  padding: 20px auto;
 }
 
 .person-info h2 {
